@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Kubernetes for .NET utviklere</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif);
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body {
+        font-family: 'Droid Serif';
+      }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: 400;
+        margin-bottom: 0;
+      }
+      .remark-slide-content h1 { font-size: 3em; }
+      .remark-slide-content h2 { font-size: 2em; }
+      .remark-slide-content h3 { font-size: 1.6em; }
+      .footnote {
+        position: absolute;
+        bottom: 3em;
+      }
+      li, p { line-height: 1.618em; }
+      .red { color: #fa0000; }
+      .gray { color: #cccccc; }
+      .large { font-size: 2em; }
+      a, a > code {
+        color: rgb(249, 38, 114);
+        text-decoration: none;
+      }
+      code {
+        background: #e7e8e2;
+        border-radius: 5px;
+      }
+      .remark-code, .remark-inline-code { 
+        font-family: 'Ubuntu Mono'; 
+        line-height: 1.25em;
+      }
+      .remark-code-line-highlighted {
+         background-color: #373832; 
+      }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      #slideshow .slide .content code {
+        font-size: 0.8em;
+      }
+      #slideshow .slide .content pre code {
+        font-size: 0.9em;
+        padding: 15px;
+      }
+      .inverse {
+        background: #272822;
+        color: #777872;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 1.618em;
+      }
+
+      /* Slide-specific styling */
+      #slide-inverse .footnote {
+        bottom: 12px;
+        left: 20px;
+      }
+      #slide-how .slides {
+        font-size: 0.9em;
+        position: absolute;
+        top:  151px;
+        right: 140px;
+      }
+      #slide-how .slides h3 {
+        margin-top: 0.2em;
+      }
+      #slide-how .slides .first, #slide-how .slides .second {
+        padding: 1px 20px;
+        height: 90px;
+        width: 120px;
+        -moz-box-shadow: 0 0 10px #777;
+        -webkit-box-shadow: 0 0 10px #777;
+        box-shadow: 0 0 10px #777;
+      }
+      #slide-how .slides .first {
+        background: #fff;
+        position: absolute;
+        top: 20%;
+        left: 20%;
+        z-index: 1;
+      }
+      #slide-how .slides .second {
+        position: relative;
+        background: #fff;
+        z-index: 0;
+      }
+
+      /* Two-column layout */
+      .left-column {
+        color: #777;
+        width: 20%;
+        height: 92%;
+        float: left;
+      }
+        .left-column h2:last-of-type, .left-column h3:last-child {
+          color: #000;
+        }
+      .right-column {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
+      }
+
+      img {
+        max-width: 100%;
+        max-height: 450px;
+      }
+
+      .icon > img {
+        width: 43px;
+        height: 43px;
+      }
+
+      pre {
+        white-space: pre-wrap; 
+      }
+
+      @page {
+        size: 908px 681px;
+        margin: 0;
+      }
+
+      @media print {
+        .remark-slide-scaler {
+          width: 100% !important;
+          height: 100% !important;
+          transform: scale(1) !important;
+          top: 0 !important;
+          left: 0 !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+name: inverse
+layout: true
+class: center, middle, inverse
+
+---
+
+# Kubernetes for .NET utviklere
+## Når Docker ikke er nok
+
+???
+Tittel: Kubernetes for .NET utviklere - Når Docker ikke er nok
+
+Abstrakt:
+Kubernetes er et kjøremiljø for kontainere. Mens Docker lar oss bygge og kjøre kontainere på en enkelt maskin, tar Kubernetes denne tankegangen mange skritt videre og orkesterer livsløpet til alle kontainerne våre i et distribuert cluster av noder. Kubernetes gir oss skalerbarhet og høy oppetid og lar oss utføre rullerende oppgraderinger av applikasjonene våre uten nedetid. Det finnes flere alternative kjøremiljø for kontainere, men Kubernetes prefereres av flere skyleverandører, inkludert Azure med sin nye Azure Container Service (AKS).
+
+Advarsel: Dette foredraget er skrevet basert på akkurat nok kompetanse for å kjøre kode i kontainere i et distribuert kjøremiljø.
+
+Kontainere skal tilsynelatende løse alle dev ops utfordringer, og Kubernetes gir svar på mange utfordringer, men fortsatt er det et stykke å gå før vi når Nirvana. Foredraget gir uansett mange tips for hva en .NET utvikler må tenke på for å ta skrittet fra kontainere på utviklermaskin til kontainere i et distribuert produskjonsmiljø.
+
+
+---
+
+layout: true
+class: center, middle
+
+---
+
+layout: false
+
+# Innhold
+
+1. Hva er en kontainer
+2. Hva er Kubernetes
+3. Hosting
+4. Demo
+5. Obs, obs, obs...
+6. Når Kubernetes ikke er nok
+7. Oppsummering
+8. Vedlegg
+
+---
+
+class: center, middle, inverse
+
+# Hva er en kontainer
+
+---
+
+# Konainere, OS og infrastruktur
+
+![Kontainer host på toppen av operativsystem og infrastruktur](./images/container-on-os-and-infrastructure.png)
+
+Kilde [What is Docker?](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/container-docker-introduction/docker-defined)
+
+???
+
+Linux vs. Windows
+Docker container host vs. Hyper-V container host
+
+---
+
+# Docker terminologi
+
+![Docker taksonomi](./images/taxonomy-in-docker.png)
+
+Kilde [Docker containers, images, and registries](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/container-docker-introduction/docker-containers-images-registries)
+
+???
+Tag
+
+---
+
+class: center, middle, inverse
+
+# Hva er Kubernetes
+
+---
+
+# Kubernetes er en kontainer orkestrator
+
+![](./images/microservises-in-kubernetes.svg)
+
+Kilde: [Designing, building, and operating microservices on Azure](https://azure.microsoft.com/en-us/blog/microservices-on-azure-kubernetes-guidance/)
+
+---
+
+# Kubernetes konsepter
+
+* Maskiner
+  * Master: API, manager og scheduler
+  * Noder: Kubelet og proxy
+* Objekter:
+    * Deployment
+    * Pod
+    * Volume
+    * Service
+    * Replica set
+    * Job
+* Navn
+* Probes
+
+---
+
+# Master og noder
+
+![Using Minikube to Create a Cluster](./images/module_01_cluster.svg)
+
+Kilde: [Using Minikube to Create a Cluster](https://kubernetes.io/docs/tutorials/kubernetes-basics/cluster-intro/)
+
+---
+
+# Deployment
+
+![Using kubectl to Create a Deployment](./images/module_02_first_app.svg)
+
+Kilde: [Using kubectl to Create a Deployment](https://kubernetes.io/docs/tutorials/kubernetes-basics/deploy-intro/)
+
+---
+
+# Pod og volume
+
+![Viewing Pods and Nodes](./images/module_03_nodes.svg)
+
+Kilde: [Viewing Pods and Nodes](https://kubernetes.io/docs/tutorials/kubernetes-basics/explore-intro/)
+
+---
+
+# Service
+
+![Using a Service to Expose Your App](./images/module_04_services.svg)
+
+Kilde: [Using a Service to Expose Your App](https://kubernetes.io/docs/tutorials/kubernetes-basics/expose-intro/)
+
+---
+
+# Replica Set
+
+* Skalering
+* Oppgradering
+
+---
+
+# Skalering
+
+![Running Multiple Instances of Your App](./images/module_05_scaling1.svg)
+
+Kilde: [Running Multiple Instances of Your App](https://kubernetes.io/docs/tutorials/kubernetes-basics/scale-intro/)
+
+---
+
+# Skalering
+
+![Running Multiple Instances of Your App](./images/module_05_scaling2.svg)
+
+Kilde: [Running Multiple Instances of Your App](https://kubernetes.io/docs/tutorials/kubernetes-basics/scale-intro/)
+
+---
+
+# Oppgradering
+
+![Performing a Rolling Update](./images/module_06_rollingupdates1.svg)
+
+Kilde: [Performing a Rolling Update](https://kubernetes.io/docs/tutorials/kubernetes-basics/update-intro/)
+
+---
+
+# Oppgradering
+
+![Performing a Rolling Update](./images/module_06_rollingupdates2.svg)
+
+Kilde: [Performing a Rolling Update](https://kubernetes.io/docs/tutorials/kubernetes-basics/update-intro/)
+
+---
+
+# Oppgradering
+
+![Performing a Rolling Update](./images/module_06_rollingupdates3.svg)
+
+Kilde: [Performing a Rolling Update](https://kubernetes.io/docs/tutorials/kubernetes-basics/update-intro/)
+
+---
+
+# Oppgradering
+
+![Performing a Rolling Update](./images/module_06_rollingupdates4.svg)
+
+Kilde: [Performing a Rolling Update](https://kubernetes.io/docs/tutorials/kubernetes-basics/update-intro/)
+
+---
+
+# Job
+
+* Batchjobber
+* Kalenderjobber
+
+---
+
+# Navn
+
+* Namespace: Definerer scope for navn på objekter
+* Tag: Merke på kontainer image
+* Label: nøkkel og verdi på et Kubernetes objekt
+* Selecor: Regel for valg av Kubernetes objekt
+
+---
+
+# Probes
+
+* Liveness
+* Readiness
+
+---
+
+# Yaml: Deklarasjon av objekter
+
+``` yaml
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+
+```
+
+---
+
+# Hosting / distribusjoner
+
+* Utvikling
+    * Minikube
+    * CoreOS Tectonic (krever VirtualBox)
+* On-premises
+    * Kube Spray
+    * CoreOS Tectonic
+* Cloud
+    * Managed
+        * Google Container Engine (GKE)
+        * Azure Container Services (AKS)
+        * Amazon Elastic Container Service (EKS)
+        * Red Hat OpenShift
+        * CoreOS Tectonic
+    * Un-managed
+        * Azure Container Service (ACS)
+
+---
+
+# Hosting / distribusjoner
+
+* Utvikling
+    * **Minikube**
+    * CoreOS Tectonic (krever VirtualBox)
+* On-premises
+    * Kube Spray
+    * CoreOS Tectonic
+* Cloud
+    * Managed
+        * Google Container Engine (GKE)
+        * **Azure Container Services (AKS)**
+        * Amazon Elastic Container Service (EKS)
+        * Red Hat OpenShift
+        * CoreOS Tectonic
+    * Un-managed
+        * Azure Container Service (ACS)
+
+---
+
+# Azure Container Services (AKS)
+
+* Microsoft har ansvaret for master og helsetilstanden til klusteret
+* Automatisk oppdatering av Kubernetes
+* Fleksibel skalering
+* Vi betaler kun for bruk av noder
+* Images lagres typisk i Azure Container Registry
+* Azure Disk og Azure File Storage kan mountes som volumes
+
+---
+
+# Minikube
+
+* Kjører i en lokal Linux VM
+* Består av et kluster med en enkelt node
+* Støtter de fleste Kubernetes funksjoner
+* Ikke 100% oppdatert med siste Kubernetes bits
+
+---
+
+# Minikube: Vanlige kommandoer
+
+Opprett cluster:
+``` powershell 
+minikube start --vm-driver="hyperv" --hyperv-virtual-switch="My Virtual Switch" --memory 4096
+```
+
+Start eksisterende cluster:
+``` powershell 
+minikube start
+```
+
+---
+
+# Minikube: Vanlige kommandoer
+
+Konfigurering av Docker verktøy for å snakke med Minikube
+
+``` powershell
+& minikube docker-env | Invoke-Expression
+```
+
+---
+
+# Minikube: Vanlige kommandoer
+
+Administrasjonsapplikasjon
+
+``` powershell
+minikube dashboard
+```
+
+---
+
+# Minikube: Vanlige kommandoer
+
+Mounting av lokal disk inn i Kubernetes host'en:
+
+``` powershell
+minikube mount "c:\data:/mnt/data"
+```
+
+Sammen med et volume av typen hostPath gir dette applikasjonskoden tilgang til lokal disk på utviklermaskin.
+
+---
+
+class: center, middle, inverse
+
+# Demo Minikube
+
+???
+
+# Docker
+* New ASP.NET Core 2.0 Web app in Visual studio
+* Kopier Dockerfile
+
+```
+docker info
+docker images
+
+```
+* Stopp Docker
+
+
+# Minikube
+```
+minikube docker-env
+& minikube docker-env | Invoke-Expression
+
+docker info
+docker images
+docker build -t kubernetes-at-nnug .
+docker tag kubernetes-at-nnug:latest kubernetes-at-nnug:v1
+
+
+minikube dashboard
+```
+
+> NB: Ikke bestandig at sletting fungerer fra dashboardet
+
+```
+minikube addons list
+minikube addons enable heapster
+kubectl get po,svc -n kube-system
+minikube addons open heapster
+```
+
+---
+
+# Kubectl: Inspeksjon
+
+``` sh
+kubectl cluster-info
+```
+
+``` sh
+kubectl get all
+```
+
+``` sh
+kubectl describe pods/<pod-name> 
+```
+
+---
+
+# Kubectl: Administrasjon
+
+``` sh
+kubectl apply <file.yaml>
+```
+
+``` sh
+kubectl exec -ti <pod-name> /bin/bash
+```
+
+``` sh
+kubectl logs <pod-name>
+```
+
+---
+
+class: center, middle, inverse
+
+# Demo kubectl
+
+???
+
+Imperativ
+```
+kubectl run kubernetes-at-nnug --image=kubernetes-at-nnug:v1 --port=80
+kubectl expose deployment kubernetes-at-nnug --type=LoadBalancer
+
+kubectl get services
+kubectl cluster-info
+
+minikube service kubernetes-at-nnug
+```
+
+Deklarativt
+```
+kubectl apply -f WebAppDeployment.yaml
+```
+
+---
+
+class: center, middle, inverse
+
+# Obs, obs, obs...
+
+---
+
+# Docker build feiler
+
+![Docker build feiler](./images/docker-build-fail-silently.png)
+
+Dockerfile må ligge på rota og da alle stier inne i filea er relativt til denne.
+
+![Docker build oky](./images/docker-build-successfully.png)
+
+
+---
+
+# Minikube starter ikke
+
+* "Turn off" minikube VM i Hyper-V
+
+  ![Minikube starter ikke](./images/minikube-not-starting.png)
+
+* Start minikube på nytt
+
+---
+
+# Misconfigured: pointing to stale minikube-vm.
+
+![Miskonfigurert Minikube VM](./images/misconfigured-pointing-to-stale-minikube-vm.png)
+
+* Restart minikube
+
+---
+
+# Flere nettverksadaptere
+
+* Dette er en av flere mulige feil
+
+  ![Feil ved bruke av flere nettverksadaptere](./images/multiple-network-adapters.png)
+
+* Bytt ut nettverksadapter i Hyper-V
+* Start minikube med parameter som peker til nettverksadapteret som er koblet på nett
+
+``` powershell
+minikube start --hyperv-virtual-switch "External Wired"
+```
+
+> NB: Vil få trøbbel om du napper ut kabelen mens minikube kjører. Mulig det finnes en måte for minikube å støtte flere nettverksadaptere.
+
+---
+
+# Minikube finner ikke latest image
+
+![Latest tag fungerer ikke med minikube](./images/minikube-latest-not-working.png)
+Legg til en eksplisitt tag og oppdater yaml fil til å bruke denne:
+``` sh
+docker tag webapplication:latest webapplication:v1
+```
+
+---
+
+class: center, middle, inverse
+
+# Demo: Azure Container Service (AKS)
+
+???
+```
+az provider register -n Microsoft.ContainerService
+
+az login
+az group create -l westeurope -g aks-nnug
+az aks create -g aks-nnug -n aks-nnug --generate-ssh-keys --node-count 1 --kubernetes-version 1.8.2
+az aks get-credentials -g aks-nnug -n aks-nnug
+kubectl config get-clusters
+kubectl config current-context
+kubectl get nodes
+
+
+az acr create -g aks-nnug -n aksnnug --sku Basic
+az acr login -n aksnnug
+az acr list -g aks-nnug --query "[].{acrLoginServer:loginServer}" --output table
+
+docker info
+docker images
+docker tag kubernetes-at-nnug aksnnug.azurecr.io/kubernetes-at-nnug:v1
+docker images
+docker push aksnnug.azurecr.io/kubernetes-at-nnug:v1
+
+az acr repository list -n aksnnug --output table
+```
+
+*** EDIT YAML ***
+```
+kubectl apply WebappDeployment.yaml
+kubectl get service kubernetes-at-nnug-service --watch
+
+kubectl proxy
+OPEN http://localhost:8001/api/v1/namespaces/kube-system/services/http:kubernetes-dashboard:/proxy/#!/overview?namespace=default
+
+kubectl get service
+
+
+az group delete -g aks-nnug
+```
+
+---
+
+class: center, middle, inverse
+
+# Når Kubernetes ikke er nok
+# Vi har bare så vidt skrapt i overflaten...
+
+---
+
+# Alternativer
+
+* Docker Swarm
+* Apache Mesos
+* Mesosphere DCOS
+* Marathon
+* Nomad
+* Azure Service Fabric
+* EC2 Container Service (ECS)
+
+---
+
+# Mer enn HelloWorld deployment
+
+* Kubernetes' deklarative yaml filer er primitive og uten variasjoner
+* Helm
+  * Parametriserte charts
+* [Spinnaker](https://www.spinnaker.io/)
+  * Netflix prosjekt
+  * Multi-sky deployments
+
+---
+
+# Overvåking
+
+* Kubernetes har kun primitiv innebygd overvåkning
+* Klusterovervåking
+  * [Prometheus](https://prometheus.io/)
+  * [Heapster](https://github.com/kubernetes/heapster)
+  * [Grafana](https://grafana.com/)
+  * [cAdvisor](https://github.com/google/cadvisor)
+* Applikasjonsovervåkning
+  * Kubernetes probes
+  * Application Insights
+  * Azure Container Monitoring Solution
+ 
+---
+
+# Utfordringer
+
+* Kubernetes er vanskelig å forstå 
+  => Regn med feiling og prøving i starten
+* Kubernetes har i en viss grad abstrahert bort applikasjons- og web serveren, men vi er fortsatt avhengig av lagrings-, nettverks- og sikkerhetsinfrastruktur
+* Kubernetes er et rikere kjøremiljø en Docker host, men har litt å gå på for å nå "PaaS" nivå (i hvert fall out-of-the-box)
+* Se etter versjons spesifikke sertifiseringer før hosting partner velges
+
+---
+
+# Utfordringer
+
+* Kubernetes er i stadig utvikling, og enkelte ganger kan det væer lurt å vente på vNext
+* Kubernetes 1.8
+  * CronJobs er i beta
+* Kubernetes 1.9
+  * Windows containere er i beta
+  * IP v6 er i alpha
+  * Tildeling av GPU ressurser er i aplpha
+* Kubernetes vNext
+  * ???
+
+---
+
+class: center, middle, inverse
+
+# Oppsummering
+
+---
+
+# Oppsummering
+
+* Docker er ikke nok - Kubernetes er orkestratoren som ser ut til å bli en de-facto standard
+* Docker image > i en kontainer > i en pod sammen med volume > deployes på en eller flere noder > som nås via en service
+
+* Kom i gang lokalt med minikube
+* Velg administrert hosting i skyen
+
+---
+
+# Veien videre
+
+* Tutorial: [Kubernetes Basics Tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/)
+* Tutorial: [Azure Container Service (AKS)](https://docs.microsoft.com/en-us/azure/aks/tutorial-kubernetes-prepare-app)
+* Pluralhsight kurs: [Getting Started with Kubernetes](https://app.pluralsight.com/library/courses/getting-started-kubernetes/table-of-contents)
+* E-bok: [.NET Microservices. Architecture for Containerized .NET Applications](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/)
+
+---
+
+class: center, middle, inverse
+
+# Spørsmål ?
+
+---
+
+class: center, middle, inverse
+
+# Vedlegg
+
+---
+# Vedlegg 1: Installasjon av Chocolatey
+
+* Jeg foretrekker å bruke Chocolatey for å installere programpakker på Windows:
+
+  ```PowerShell
+  Set-ExecutionPolicy Bypass; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+  ```
+  
+---
+
+# Vedlegg 2: Installasjon av Docker
+
+* Om du har Windows 10 Build 10586 eller nyere, installer Docker for Windows med bruk av Hyper-V: [https://docs.docker.com/docker-for-windows/install/](https://docs.docker.com/docker-for-windows/install/)
+
+  ```PowerShell
+  choco install -y docker-for-windows
+  ```
+
+* Ellers installer Docker Toolbox med bruk av VirtualBox (anbefales ikke: [https://docs.docker.com/toolbox/toolbox_install_windows/](https://docs.docker.com/toolbox/toolbox_install_windows/)
+
+    ```PowerShell
+    choco install -y docker-toolbox
+    ```
+
+    Miljøvariabelen ```DOCKER_TLS_VERIFY``` må settes til ```1```:
+    ```PowerShell
+    [System.Environment]::SetEnvironmentVariable("DOCKER_TLS_VERIFY", "1", "User")
+    ``` 
+
+---
+
+# Vedlegg 3: Installasjon av Minikube
+
+```PowerShell
+choco install -y minikube
+```
+
+Opprett en ekstern virtuell switch i Hyper-V, og noter navnet. Om du har både trådløs og trådbasert nettverk, se nevnte problemer med flere nettverkskort over.
+
+Opprett Kubernetes kluster med Minikube:
+```PowerShell
+minikube start --vm-driver hyperv --hyperv-virtual-switch "External Wireless"
+```
+
+Denne kommandoen oppretter en Linux vm i Hyper-V med navn "minikube" og starter denne. Om denne ikke vil starte, se problemet med oppstart over.
+
+Senere trenger du kun bruke start kommandoen for å starte et eksisterende kluster:
+```PowerShell
+minikube start 
+```
+
+---
+
+# Vedlegg 4: Konfigurasjon av Docker sammen med Minikube
+
+Docker kommandoen vil som standard bruke sin egen Docker host for å deploye og kjøre images. For at kommandoen skal gå mot Minikube istede må den konfigureres ved å sette noen miljøvariable. Minikube har en hjelpe kommando for dette som du kan kjøre slik fra PowerShell:
+
+``` PowerShell
+& minikube docker-env | Invoke-Expression
+```
+
+Bruker du et annet shell kan du skrive dette for å få hjelp om hva du må kjøre for å få satt disse mijløvariblene:
+``` sh
+minikube docker-env
+```
+
+
+    </textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
