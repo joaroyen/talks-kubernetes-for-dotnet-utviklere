@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Kubernetes for .NET utviklere</title>
+    <title>Kubernetes for Aztek</title>
     <meta charset="utf-8">
     <style>
       @import url(https://fonts.googleapis.com/css?family=Droid+Serif);
@@ -159,9 +159,9 @@ class: center, middle, inverse
 
 ---
 
-# Kubernetes for .NET utviklere
+# Kubernetes for Aztek
 ## Når Docker ikke er nok
-December 2020 revision
+Utgave: 15. desember 2020
 
 ???
 Tittel: Kubernetes for .NET utviklere - Når Docker ikke er nok
@@ -186,13 +186,11 @@ layout: false
 # Innhold
 
 1. Hva er en kontainer
-2. Hva er Kubernetes
-3. Hosting
-4. Demo
-5. Obs, obs, obs...
-6. Når Kubernetes ikke er nok
-7. Oppsummering
-8. Vedlegg
+1. Hva er Kubernetes
+1. Hosting
+1. Kubectl
+1. Når Kubernetes ikke er nok
+1. Oppsummering
 
 ---
 
@@ -243,8 +241,8 @@ Kilde: [Designing, building, and operating microservices on Azure](https://azure
 # Kubernetes konsepter
 
 * Maskiner
-  * Master: API, manager og scheduler
-  * Noder: Kubelet og proxy
+  * Control plane: API, manager og scheduler
+  * Workers: Kubelet og proxy
 * Objekter:
     * Deployment
     * Pod
@@ -257,7 +255,7 @@ Kilde: [Designing, building, and operating microservices on Azure](https://azure
 
 ---
 
-# Master og noder
+# Control plane og workers
 
 ![Using Minikube to Create a Cluster](./images/module_01_cluster.svg)
 
@@ -351,12 +349,22 @@ Kilde: [Performing a Rolling Update](https://kubernetes.io/docs/tutorials/kubern
 
 ---
 
+class: inverse
+
+# Navn
+
+_There are only two hard things in Computer Science: cache invalidation and naming things._
+
+_-- Phil Karlton_
+
+---
+
 # Navn
 
 * Namespace: Definerer scope for navn på objekter
 * Tag: Merke på kontainer image
 * Label: nøkkel og verdi på et Kubernetes objekt
-* Selecor: Regel for valg av Kubernetes objekt
+* Selector: Regel for valg av Kubernetes objekt
 
 ---
 
@@ -399,46 +407,68 @@ spec:
 # Hosting / distribusjoner
 
 * Utvikling
+    * Kind
     * Minikube
-    * CoreOS Tectonic (krever VirtualBox)
 * On-premises
     * Kube Spray
     * CoreOS Tectonic
 * Cloud
-    * Managed
-        * Google Container Engine (GKE)
-        * Azure Container Services (AKS)
-        * Amazon Elastic Container Service (EKS)
-        * Red Hat OpenShift
-        * CoreOS Tectonic
-    * Un-managed
-        * Azure Container Service (ACS)
+    * Google Container Engine (GKE)
+    * Azure Container Services (AKS)
+    * Amazon Elastic Container Service (EKS)
+    * Red Hat OpenShift
+    * CoreOS Tectonic
 
 ---
 
 # Hosting / distribusjoner
 
 * Utvikling
-    * **Minikube**
-    * CoreOS Tectonic (krever VirtualBox)
+    * **Kind**
+    * Minikube
 * On-premises
     * Kube Spray
     * CoreOS Tectonic
 * Cloud
-    * Managed
-        * Google Container Engine (GKE)
-        * **Azure Container Services (AKS)**
-        * Amazon Elastic Container Service (EKS)
-        * Red Hat OpenShift
-        * CoreOS Tectonic
-    * Un-managed
-        * Azure Container Service (ACS)
+    * Google Container Engine (GKE)
+    * **Azure Container Services (AKS)**
+    * Amazon Elastic Container Service (EKS)
+    * Red Hat OpenShift
+    * CoreOS Tectonic
+
+---
+
+# Kind
+
+* Kjører som Docker containere
+* Består av et kluster med en control plane container og en eller flere worker containere
+
+<div class="mermaid">
+flowchart
+  subgraph Windows
+    subgraph Docker
+      subgraph Kind
+        CP(Control plane)
+        CP --> W1(Worker 1)
+        CP --> W2(Worker 2)
+        CP --> W3(Worker 3)
+      end
+    end
+    
+    subgraph WSL2
+      L(Linux) --> LF(Filsystem)
+    end
+
+    Docker -- Kjører på--> WSL2
+  end
+  
+</div>
 
 ---
 
 # Azure Container Services (AKS)
 
-* Microsoft har ansvaret for master og helsetilstanden til klusteret
+* Microsoft har ansvaret for control plane og helsetilstanden til klusteret
 * Automatisk oppdatering av Kubernetes
 * Fleksibel skalering
 * Vi betaler kun for bruk av noder
@@ -447,105 +477,18 @@ spec:
 
 ---
 
-# Minikube
+# Kubectl
 
-* Kjører i en lokal Linux VM
-* Består av et kluster med en enkelt node
-* Støtter de fleste Kubernetes funksjoner
-* Ikke 100% oppdatert med siste Kubernetes bits
-
----
-
-# Minikube: Vanlige kommandoer
-
-Opprett cluster:
-``` powershell 
-minikube start --vm-driver="hyperv" --hyperv-virtual-switch="My Virtual Switch" --memory 4096
-```
-
-Start eksisterende cluster:
-``` powershell 
-minikube start
-```
-
----
-
-# Minikube: Vanlige kommandoer
-
-Konfigurering av Docker verktøy for å snakke med Minikube
-
-``` powershell
-& minikube docker-env | Invoke-Expression
-```
-
----
-
-# Minikube: Vanlige kommandoer
-
-Administrasjonsapplikasjon
-
-``` powershell
-minikube dashboard
-```
-
----
-
-# Minikube: Vanlige kommandoer
-
-Mounting av lokal disk inn i Kubernetes host'en:
-
-``` powershell
-minikube mount "c:\data:/mnt/data"
-```
-
-Sammen med et volume av typen hostPath gir dette applikasjonskoden tilgang til lokal disk på utviklermaskin.
-
----
-
-class: center, middle, inverse
-
-# Demo Minikube
-
-???
-
-# Docker
-* New ASP.NET Core 2.0 Web app in Visual studio
-* Kopier Dockerfile
-
-```
-docker info
-docker images
-
-```
-* Stopp Docker
-
-
-# Minikube
-```
-minikube docker-env
-& minikube docker-env | Invoke-Expression
-
-docker info
-docker images
-docker build -t kubernetes-at-nnug .
-docker tag kubernetes-at-nnug:latest kubernetes-at-nnug:v1
-
-
-minikube dashboard
-```
-
-> NB: Ikke bestandig at sletting fungerer fra dashboardet
-
-```
-minikube addons list
-minikube addons enable heapster
-kubectl get po,svc -n kube-system
-minikube addons open heapster
-```
+- Kommandolinje verktøy for å administrere Kubernetes
+- Valg av kontekst styrer hvilket Kubernetes kluster du går mot
 
 ---
 
 # Kubectl: Inspeksjon
+
+``` sh 
+kubectl.exe config set-context <name>
+```
 
 ``` sh
 kubectl cluster-info
@@ -573,138 +516,6 @@ kubectl exec -ti <pod-name> /bin/bash
 
 ``` sh
 kubectl logs <pod-name>
-```
-
----
-
-class: center, middle, inverse
-
-# Demo kubectl
-
-???
-
-Imperativ
-```
-kubectl run kubernetes-at-nnug --image=kubernetes-at-nnug:v1 --port=80
-kubectl expose deployment kubernetes-at-nnug --type=LoadBalancer
-
-kubectl get services
-kubectl cluster-info
-
-minikube service kubernetes-at-nnug
-```
-
-Deklarativt
-```
-kubectl apply -f WebAppDeployment.yaml
-```
-
----
-
-class: center, middle, inverse
-
-# Obs, obs, obs...
-
----
-
-# Docker build feiler
-
-![Docker build feiler](./images/docker-build-fail-silently.png)
-
-Dockerfile må ligge på rota og da alle stier inne i filea er relativt til denne.
-
-![Docker build oky](./images/docker-build-successfully.png)
-
-
----
-
-# Minikube starter ikke
-
-* "Turn off" minikube VM i Hyper-V
-
-  ![Minikube starter ikke](./images/minikube-not-starting.png)
-
-* Start minikube på nytt
-
----
-
-# Misconfigured: pointing to stale minikube-vm.
-
-![Miskonfigurert Minikube VM](./images/misconfigured-pointing-to-stale-minikube-vm.png)
-
-* Restart minikube
-
----
-
-# Flere nettverksadaptere
-
-* Dette er en av flere mulige feil
-
-  ![Feil ved bruke av flere nettverksadaptere](./images/multiple-network-adapters.png)
-
-* Bytt ut nettverksadapter i Hyper-V
-* Start minikube med parameter som peker til nettverksadapteret som er koblet på nett
-
-``` powershell
-minikube start --hyperv-virtual-switch "External Wired"
-```
-
-> NB: Vil få trøbbel om du napper ut kabelen mens minikube kjører. Mulig det finnes en måte for minikube å støtte flere nettverksadaptere.
-
----
-
-# Minikube finner ikke latest image
-
-![Latest tag fungerer ikke med minikube](./images/minikube-latest-not-working.png)
-Legg til en eksplisitt tag og oppdater yaml fil til å bruke denne:
-``` sh
-docker tag webapplication:latest webapplication:v1
-```
-
----
-
-class: center, middle, inverse
-
-# Demo: Azure Container Service (AKS)
-
-???
-```
-az provider register -n Microsoft.ContainerService
-
-az login
-az group create -l westeurope -g aks-nnug
-az aks create -g aks-nnug -n aks-nnug --generate-ssh-keys --node-count 1 --kubernetes-version 1.8.2
-az aks get-credentials -g aks-nnug -n aks-nnug
-kubectl config get-clusters
-kubectl config current-context
-kubectl get nodes
-
-
-az acr create -g aks-nnug -n aksnnug --sku Basic
-az acr login -n aksnnug
-az acr list -g aks-nnug --query "[].{acrLoginServer:loginServer}" --output table
-
-docker info
-docker images
-docker tag kubernetes-at-nnug aksnnug.azurecr.io/kubernetes-at-nnug:v1
-docker images
-docker push aksnnug.azurecr.io/kubernetes-at-nnug:v1
-
-az acr repository list -n aksnnug --output table
-```
-
-*** EDIT YAML ***
-```
-kubectl apply WebappDeployment.yaml
-kubectl get service kubernetes-at-nnug-service --watch
-
-kubectl proxy
-OPEN http://localhost:8001/api/v1/namespaces/kube-system/services/http:kubernetes-dashboard:/proxy/#!/overview?namespace=default
-
-kubectl get service
-
-
-az group delete -g aks-nnug
 ```
 
 ---
@@ -754,6 +565,14 @@ class: center, middle, inverse
  
 ---
 
+# Service Mesh
+
+* [Istio](https://istio.io/)
+* [Dapr](https://dapr.io/)
+* [Linkerd](https://linkerd.io/)
+
+---
+
 # Utfordringer
 
 * Kubernetes er vanskelig å forstå 
@@ -767,9 +586,9 @@ class: center, middle, inverse
 # Utfordringer
 
 * Kubernetes er i stadig utvikling, og enkelte ganger kan det væer lurt å vente på vNext
-* Kubernetes 1.8
+* Kubernetes 1.8 (september 2017)
   * CronJobs er i beta
-* Kubernetes 1.9
+* Kubernetes 1.9 (desember 2017)
   * Windows containere er i beta
   * IP v6 er i alpha
   * Tildeling av GPU ressurser er i aplpha
@@ -786,10 +605,10 @@ class: center, middle, inverse
 
 # Oppsummering
 
-* Docker er ikke nok - Kubernetes er orkestratoren som ser ut til å bli en de-facto standard
+* Docker er ikke nok - Kubernetes er orkestratoren som er en de-facto standard
 * Docker image > i en kontainer > i en pod sammen med volume > deployes på en eller flere noder > som nås via en service
 
-* Kom i gang lokalt med minikube
+* Kom i gang lokalt med kind
 * Velg administrert hosting i skyen
 
 ---
@@ -807,85 +626,12 @@ class: center, middle, inverse
 
 # Spørsmål ?
 
----
-
-class: center, middle, inverse
-
-# Vedlegg
-
----
-# Vedlegg 1: Installasjon av Chocolatey
-
-* Jeg foretrekker å bruke Chocolatey for å installere programpakker på Windows:
-
-  ```PowerShell
-  Set-ExecutionPolicy Bypass; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-  ```
-  
----
-
-# Vedlegg 2: Installasjon av Docker
-
-* Om du har Windows 10 Build 10586 eller nyere, installer Docker for Windows med bruk av Hyper-V: [https://docs.docker.com/docker-for-windows/install/](https://docs.docker.com/docker-for-windows/install/)
-
-  ```PowerShell
-  choco install -y docker-for-windows
-  ```
-
-* Ellers installer Docker Toolbox med bruk av VirtualBox (anbefales ikke: [https://docs.docker.com/toolbox/toolbox_install_windows/](https://docs.docker.com/toolbox/toolbox_install_windows/)
-
-    ```PowerShell
-    choco install -y docker-toolbox
-    ```
-
-    Miljøvariabelen ```DOCKER_TLS_VERIFY``` må settes til ```1```:
-    ```PowerShell
-    [System.Environment]::SetEnvironmentVariable("DOCKER_TLS_VERIFY", "1", "User")
-    ``` 
-
----
-
-# Vedlegg 3: Installasjon av Minikube
-
-```PowerShell
-choco install -y minikube
-```
-
-Opprett en ekstern virtuell switch i Hyper-V, og noter navnet. Om du har både trådløs og trådbasert nettverk, se nevnte problemer med flere nettverkskort over.
-
-Opprett Kubernetes kluster med Minikube:
-```PowerShell
-minikube start --vm-driver hyperv --hyperv-virtual-switch "External Wireless"
-```
-
-Denne kommandoen oppretter en Linux vm i Hyper-V med navn "minikube" og starter denne. Om denne ikke vil starte, se problemet med oppstart over.
-
-Senere trenger du kun bruke start kommandoen for å starte et eksisterende kluster:
-```PowerShell
-minikube start 
-```
-
----
-
-# Vedlegg 4: Konfigurasjon av Docker sammen med Minikube
-
-Docker kommandoen vil som standard bruke sin egen Docker host for å deploye og kjøre images. For at kommandoen skal gå mot Minikube istede må den konfigureres ved å sette noen miljøvariable. Minikube har en hjelpe kommando for dette som du kan kjøre slik fra PowerShell:
-
-``` PowerShell
-& minikube docker-env | Invoke-Expression
-```
-
-Bruker du et annet shell kan du skrive dette for å få hjelp om hva du må kjøre for å få satt disse mijløvariblene:
-``` sh
-minikube docker-env
-```
-
-
     </textarea>
-    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
-    </script>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <script>
       var slideshow = remark.create();
+      mermaid.initialize({startOnLoad:true});
     </script>
   </body>
 </html>
