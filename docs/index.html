@@ -140,6 +140,10 @@
         margin: 0;
       }
 
+      svg {
+        height: 100%;
+      }
+
       @media print {
         .remark-slide-scaler {
           width: 100% !important;
@@ -200,7 +204,7 @@ class: center, middle, inverse
 
 ---
 
-# Konainere, OS og infrastruktur
+# Kontainere, OS og infrastruktur
 
 ![Kontainer host på toppen av operativsystem og infrastruktur](./images/container-on-os-and-infrastructure.png)
 
@@ -247,9 +251,9 @@ class: center, middle, inverse
 # Hvorfor kontainere og Kubernetes?
 
 - Konsistent kjøremiljø
-  - slutt på unnskyldningen "It owrks on my machine"
+  - slutt på unnskyldningen "It works on my machine"
   - repeterbar
-- Isolasjon av applikasjon og avhengigheter
+- Isolasjon av applikasjon med avhengigheter
   - forenklet versjonering
   - kontinuerlig utrulling
 - Lite overhead
@@ -266,10 +270,9 @@ class: center, middle, inverse
 - Trenger kompetanse på både utvikling og infrastruktur
 - Forutsetter automasjon
 - Forutsetter logging og innsikt
-- Enda viktigere å tenke på håndtering av tilsynelatend
+- Enda viktigere å tenke på håndtering av tilstand
 - Lengre kode - bygging - debugging syklus
 - Ikke alle løsningsarkitekturer er egnet for kontainere
-
 - Vær forberedt på kontinuerlig oppdatering og evaluering av nye muligheter
 
 ---
@@ -282,7 +285,7 @@ class: center, middle, inverse
 
 # Kubernetes konsepter
 
-* Maskiner
+* Maskiner i kluster
   * Control plane: API, manager og scheduler
   * Workers: Kubelet og proxy
 * Objekter:
@@ -496,14 +499,30 @@ flowchart
         CP --> W2(Worker 2)
         CP --> W3(Worker 3)
       end
+
+      subgraph Lagring
+        W2  --> V2(Volumes)
+        W3  --> V3(Volumes)
+
+        I(Images) 
+      end
     end
     
     subgraph WSL2
-      L(Linux) --> LF(Filsystem)
+      L(Linux kjerne) --> LF(Linux filsystem)
     end
 
     Docker -- Kjører på--> WSL2
+  
+    WF(Windows filsystem)
   end
+
+  
+  classDef container fill:#9fe;
+  classDef linux fill:#fe9;
+
+  class CP,W1,W2,W3 container
+  class L linux
   
 </div>
 
@@ -512,7 +531,7 @@ flowchart
 # Azure Container Services (AKS)
 
 * Microsoft har ansvaret for control plane og helsetilstanden til klusteret
-* Automatisk oppdatering av Kubernetes
+* Automatisert oppdatering av Kubernetes
 * Fleksibel skalering
 * Vi betaler kun for bruk av noder
 * Images lagres typisk i Azure Container Registry
