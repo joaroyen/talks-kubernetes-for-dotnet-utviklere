@@ -549,7 +549,7 @@ flowchart
 # Kubectl: Inspeksjon
 
 ``` sh 
-kubectl.exe config set-context <name>
+kubectl config set-context <name>
 ```
 
 ``` sh
@@ -569,7 +569,7 @@ kubectl describe pods/<pod-name>
 # Kubectl: Administrasjon
 
 ``` sh
-kubectl apply <file.yaml>
+kubectl apply -f <file.yaml>
 ```
 
 ``` sh
@@ -632,16 +632,6 @@ class: center, middle, inverse
 * [Istio](https://istio.io/)
 * [Dapr](https://dapr.io/)
 * [Linkerd](https://linkerd.io/)
-
----
-
-# Utfordringer
-
-* Kubernetes er vanskelig å forstå 
-  => Regn med feiling og prøving i starten
-* Kubernetes har i en viss grad abstrahert bort applikasjons- og web serveren, men vi er fortsatt avhengig av lagrings-, nettverks- og sikkerhetsinfrastruktur
-* Kubernetes er et rikere kjøremiljø en Docker host, men har litt å gå på for å nå "PaaS" nivå (i hvert fall out-of-the-box)
-* Se etter versjons spesifikke sertifiseringer før hosting partner velges
 
 ---
 
